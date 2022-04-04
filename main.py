@@ -4,7 +4,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class NSOManiuplator:
-    def getDevices(self):
+    def getDevices(self): #returns devices on nso
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -21,7 +21,7 @@ class NSOManiuplator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def getDeviceHostname(self, device):
+    def getDeviceHostname(self, device): #returns hostname of device (inputed by user)
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -38,7 +38,7 @@ class NSOManiuplator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def getDeviceConfig(self, device):
+    def getDeviceConfig(self, device): #returns the devices config
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -52,7 +52,7 @@ class NSOManiuplator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def getLoopback(self):
+    def getLoopback(self): #returns loopback services on nso
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -62,35 +62,38 @@ class NSOManiuplator:
             response = requests.get('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service',
                                     headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
+            if response.text == "":
+                print("no loopback services to print")
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def patchLoopback(self, name):
+    def patchLoopback(self): #creates a new loopback service
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
             }
-
+            # you can edit name of service and device here,
             data = '{ "loopback-service:loopback-service": [ { "name": "test2", "device": "dist-rtr01", "dummy": "1.1.1.1"} ] }'
-
-            print(data)
 
             response = requests.patch('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service',
                                       headers=headers, data=data, verify=False, auth=('admin', 'admin'))
+
             print(response)
+            if response == 200 or 204:
+                print("Successfully created loopback")
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def deleteLoopback(self):
+    def deleteLoopback(self): #deletes the loopback we created
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
             }
-
-            response = requests.delete('https://10.10.20.50:8888/restconf/data/'
-                                       'loopback-service:loopback-service={0}',
+            # you can edit name of service and device here,
+            response = requests.delete('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service=test2',
                                        headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
+            print("Successful Delete of loopback service")
         except requests.exceptions.HTTPError as error:
             print(error)
 
@@ -115,11 +118,9 @@ class NSOManiuplator:
                 device = input("Please enter device name (exact): ")
                 self.getDeviceHostname(device)
             if "delete" in userInput.lower():
-                name = input("Please input name of loopback service to delete: ")
-                self.deleteLoopback(name)
+                self.deleteLoopback()
             if "patch" in userInput.lower():
-                name = input("please enter a loopback service name: ")
-                self.patchLoopback(name)
+                self.patchLoopback()
             if "device" and "config" in userInput.lower():
                 deviceName = input("device name:")
                 self.getDeviceConfig(deviceName)
