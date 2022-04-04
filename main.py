@@ -78,11 +78,14 @@ class NSOManiuplator:
             response = requests.patch('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service',
                                       headers=headers, data=data, verify=False, auth=('admin', 'admin'))
 
-            print(response)
-            if response == 200 or 204:
+            print("response: ", response.status_code)
+            if response.status_code <= 204:
                 print("Successfully created loopback")
+            else:
+                print("Failed to create loopback")
         except requests.exceptions.HTTPError as error:
             print(error)
+
 
     def deleteLoopback(self): #deletes the loopback we created
         try:
@@ -108,20 +111,20 @@ class NSOManiuplator:
               " 'delete loop'        deletes existing Loopback service\n"
               " 'device config'      returns config of specified device ")
         while 1:
-            print("please enter a command")
+            print("please enter a valid command")
             userInput = input("get, patch, delete: ")
-            if "get" and "devices" in userInput.lower():
+            if userInput.lower() == "get devices":
                 self.getDevices()
-            if "get" and "loop" in userInput.lower():
+            if userInput.lower() == "get loop":
                 self.getLoopback()
             if userInput.lower() == "get device":
                 device = input("Please enter device name (exact): ")
                 self.getDeviceHostname(device)
-            if "delete" in userInput.lower():
+            if userInput.lower() == "delete loop":
                 self.deleteLoopback()
-            if "patch" in userInput.lower():
+            if userInput.lower() == "patch loop":
                 self.patchLoopback()
-            if "device" and "config" in userInput.lower():
+            if userInput.lower() == "device config":
                 deviceName = input("device name:")
                 self.getDeviceConfig(deviceName)
 
