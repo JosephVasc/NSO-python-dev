@@ -7,6 +7,7 @@ class NSOManiuplator:
 
     def __init__(self):
         self.url = "https://10.10.20.50:8888"
+        self.deviceNames = ""
 
     def getDevices(self): #returns devices on nso
         try:
@@ -71,19 +72,24 @@ class NSOManiuplator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def patchLoopback(self): #creates a new loopback service
+    def patchLoopback(self, name, device): #creates a new loopback service
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
             }
-            # you can edit name of service and device here,
-            data = '{ "loopback-service:loopback-service": [ { "name": "test2", "device": "dist-rtr01", "dummy": "1.1.1.1"} ] }'
+
+            # had to use '%s' formatting here, fstring will not work due to depth of '{'
+            # and format will not work because of '{'
+
+            data = '{ "loopback-service:loopback-service": [ { "name": "%s", "device": "%s", "dummy": "1.1.1.1"} ] }' \
+                   % (name, device)
+            print(data)
 
             response = requests.patch('{0}/restconf/data/loopback-service:loopback-service'.format(self.url),
                                       headers=headers, data=data, verify=False, auth=('admin', 'admin'))
 
             print("response: ", response.status_code)
-            if response.status_code <= 204:
+            if response.status_code == 204 or response.status_code == 200:
                 print("Successfully created loopback")
             else:
                 print("Failed to create loopback")
@@ -91,19 +97,18 @@ class NSOManiuplator:
             print(error)
 
 
-    def deleteLoopback(self): #deletes the loopback we created
+    def deleteLoopback(self, name): #deletes the loopback we created
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
             }
-            # you can edit name of service and device here,
-            response = requests.delete('{0}/restconf/data/loopback-service:loopback-service=test2'.format(self.url),
+            # you can edit name of service
+            response = requests.delete('{0}/restconf/data/loopback-service:loopback-service={1}'.format(self.url, name),
                                        headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
             print("Successful Delete of loopback service")
         except requests.exceptions.HTTPError as error:
             print(error)
-
 
     def main(self):
         print("Welcome to NSO Maniuplator, the following commands are accepted \n"
@@ -125,11 +130,14 @@ class NSOManiuplator:
                 device = input("Please enter device name (exact): ")
                 self.getDeviceHostname(device)
             if userInput.lower() == "delete loop":
-                self.deleteLoopback()
+                name = input("please enter name of service: ")
+                self.deleteLoopback(name)
             if userInput.lower() == "patch loop":
-                self.patchLoopback()
+                name = input("please enter name of service: ")
+                device = input("please enter device for loopback: ")
+                self.patchLoopback(name, device)
             if userInput.lower() == "device config":
-                deviceName = input("device name:")
+                deviceName = input("device name: ")
                 self.getDeviceConfig(deviceName)
 
 
