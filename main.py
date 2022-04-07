@@ -104,29 +104,12 @@ class NSOManipulator:
             print(error)
 
     def patchLoopbackAll(self, name): #creates a new loopback service for all devices
-        try:
-            headers = {
-                'Content-Type': 'application/yang-data+json',
-            }
+        if not self.deviceNames: #if devicenames is not populated, populate it
+            self.getDevices()
 
-            if not self.deviceNames: #if devicenames is not populated, populate it
-                self.getDevices()
+        for device in self.deviceNames: #for every device create a loopback service
+            self.patchLoopback(name, device)
 
-            for device in self.deviceNames: #for every device create a loopback service
-                data = '{ "loopback-service:loopback-service": [ { "name": "%s", "device": "%s", "dummy": "1.1.1.1"} ] }' \
-                       % (name, device)
-                print(data)
-
-                response = requests.patch('{0}/restconf/data/loopback-service:loopback-service'.format(self.url),
-                                          headers=headers, data=data, verify=False, auth=('admin', 'admin'))
-
-                print("response: ", response.status_code)
-                if response.status_code == 204 or response.status_code == 200:
-                    print("Successfully created loopback service")
-                else:
-                    print("Failed to create loopback")
-        except requests.exceptions.HTTPError as error:
-            print(error)
 
 
     def deleteLoopback(self, name): #deletes the loopback we created
@@ -139,6 +122,7 @@ class NSOManipulator:
                                        headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
             print("Successful Delete of loopback service")
+
         except requests.exceptions.HTTPError as error:
             print(error)
 
