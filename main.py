@@ -3,7 +3,7 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
-class NSOManiuplator:
+class NSOManipulator:
 
     def __init__(self):
         self.url = "https://10.10.20.50:8888"
@@ -142,7 +142,7 @@ class NSOManiuplator:
 
 
 if __name__ == "__main__":
-    app = NSOManiuplator()
+    app = NSOManipulator()
     app.main()
 
 
