@@ -3,11 +3,12 @@ import urllib3
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
+
 class NSOManipulator:
 
     def __init__(self):
         self.url = "https://10.10.20.50:8888"
-        self.deviceNames = ""
+        self.deviceNames = []
 
     def getDevices(self): #returns devices on nso
         try:
@@ -23,6 +24,12 @@ class NSOManipulator:
             response = requests.get('{0}/restconf/data/tailf-ncs:devices/device'.format(self.url), headers=headers,
                                     params=params, verify=False, auth=('admin', 'admin'))
             print(response.text)
+            deviceNames = response.json()
+            for device in deviceNames['tailf-ncs:device']:
+                if device['name'] not in self.deviceNames:
+                    self.deviceNames.append(device['name'])
+            print(self.deviceNames)
+
         except requests.exceptions.HTTPError as error:
             print(error)
 
@@ -96,13 +103,38 @@ class NSOManipulator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
+    def patchLoopbackAll(self, name): #creates a new loopback service for all devices
+        try:
+            headers = {
+                'Content-Type': 'application/yang-data+json',
+            }
+
+            if not self.deviceNames: #if devicenames is not populated, populate it
+                self.getDevices()
+
+            for device in self.deviceNames: #for every device create a loopback service
+                data = '{ "loopback-service:loopback-service": [ { "name": "%s", "device": "%s", "dummy": "1.1.1.1"} ] }' \
+                       % (name, device)
+                print(data)
+
+                response = requests.patch('{0}/restconf/data/loopback-service:loopback-service'.format(self.url),
+                                          headers=headers, data=data, verify=False, auth=('admin', 'admin'))
+
+                print("response: ", response.status_code)
+                if response.status_code == 204 or response.status_code == 200:
+                    print("Successfully created loopback service")
+                else:
+                    print("Failed to create loopback")
+        except requests.exceptions.HTTPError as error:
+            print(error)
+
 
     def deleteLoopback(self, name): #deletes the loopback we created
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
             }
-            # you can edit name of service
+
             response = requests.delete('{0}/restconf/data/loopback-service:loopback-service={1}'.format(self.url, name),
                                        headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
@@ -118,6 +150,7 @@ class NSOManipulator:
               " 'get loop'           returns Loopback services \n"
               " 'patch loop'         patches a new Loopback service \n"
               " 'delete loop'        deletes existing Loopback service\n"
+              " 'patch loop all'     patches a new Loopback service for all devices \n"
               " 'device config'      returns config of specified device ")
         while 1:
             print("please enter a valid command")
@@ -139,6 +172,9 @@ class NSOManipulator:
             if userInput.lower() == "device config":
                 deviceName = input("device name: ")
                 self.getDeviceConfig(deviceName)
+            if userInput.lower() == "patch loop all":
+                name = input("please enter name of service: ")
+                self.patchLoopbackAll(name)
 
 
 if __name__ == "__main__":
