@@ -4,6 +4,10 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class NSOManiuplator:
+
+    def __init__(self):
+        self.url = "https://10.10.20.50:8888"
+
     def getDevices(self): #returns devices on nso
         try:
             headers = {
@@ -15,7 +19,7 @@ class NSOManiuplator:
                 'fields': 'name',
             }
 
-            response = requests.get('https://10.10.20.50:8888/restconf/data/tailf-ncs:devices/device', headers=headers,
+            response = requests.get('{0}/restconf/data/tailf-ncs:devices/device'.format(self.url), headers=headers,
                                     params=params, verify=False, auth=('admin', 'admin'))
             print(response.text)
         except requests.exceptions.HTTPError as error:
@@ -29,8 +33,8 @@ class NSOManiuplator:
             }
 
             response = requests.get(
-                'https://10.10.20.50:8888/restconf/data/tailf-ncs:devices'
-                '/device={0}/config/tailf-ned-cisco-ios:hostname'.format(device),
+                '{0}/restconf/data/tailf-ncs:devices/device={1}/config/tailf-ned-cisco-ios:hostname'
+                    .format(self.url, device),
                 headers=headers, verify=False, auth=('admin', 'admin'))
             if response.text == "":
                 print("No tailf-ned-cisco-ios Hostname for {0}".format(device))
@@ -45,8 +49,8 @@ class NSOManiuplator:
                 'Content-Type': 'application/yang-data+xml',
             }
 
-            response = requests.get('https://10.10.20.50:8888/restconf/data/tailf-ncs:devices'
-                                    '/device={0}/config'.format(device),
+            response = requests.get('{0}/restconf/data/tailf-ncs:devices'
+                                    '/device={1}/config'.format(self.url,device),
                                     headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
         except requests.exceptions.HTTPError as error:
@@ -59,7 +63,7 @@ class NSOManiuplator:
                 'Content-Type': 'application/yang-data+json',
             }
 
-            response = requests.get('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service',
+            response = requests.get('{0}/restconf/data/loopback-service:loopback-service'.format(self.url),
                                     headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
             if response.text == "":
@@ -75,7 +79,7 @@ class NSOManiuplator:
             # you can edit name of service and device here,
             data = '{ "loopback-service:loopback-service": [ { "name": "test2", "device": "dist-rtr01", "dummy": "1.1.1.1"} ] }'
 
-            response = requests.patch('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service',
+            response = requests.patch('{0}/restconf/data/loopback-service:loopback-service'.format(self.url),
                                       headers=headers, data=data, verify=False, auth=('admin', 'admin'))
 
             print("response: ", response.status_code)
@@ -93,7 +97,7 @@ class NSOManiuplator:
                 'Content-Type': 'application/yang-data+json',
             }
             # you can edit name of service and device here,
-            response = requests.delete('https://10.10.20.50:8888/restconf/data/loopback-service:loopback-service=test2',
+            response = requests.delete('{0}/restconf/data/loopback-service:loopback-service=test2'.format(self.url),
                                        headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
             print("Successful Delete of loopback service")
