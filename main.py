@@ -1,7 +1,7 @@
 import requests
 import urllib3
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 class NSOManipulator:
@@ -10,7 +10,7 @@ class NSOManipulator:
         self.url = "https://10.10.20.50:8888"
         self.deviceNames = []
 
-    def getDevices(self): #returns devices on nso
+    def getDevices(self):  # returns devices on nso
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -33,7 +33,7 @@ class NSOManipulator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def getDeviceHostname(self, device): #returns hostname of device (inputed by user)
+    def getDeviceHostname(self, device):  # returns hostname of device (inputed by user)
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -50,7 +50,7 @@ class NSOManipulator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def getDeviceConfig(self, device): #returns the devices config
+    def getDeviceConfig(self, device):  # returns the devices config
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -58,13 +58,13 @@ class NSOManipulator:
             }
 
             response = requests.get('{0}/restconf/data/tailf-ncs:devices'
-                                    '/device={1}/config'.format(self.url,device),
+                                    '/device={1}/config'.format(self.url, device),
                                     headers=headers, verify=False, auth=('admin', 'admin'))
             print(response.text)
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def getLoopback(self): #returns loopback services on nso
+    def getLoopback(self):  # returns loopback services on nso
         try:
             headers = {
                 'Accept': 'application/yang-data+json',
@@ -79,7 +79,7 @@ class NSOManipulator:
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def patchLoopback(self, name, device): #creates a new loopback service
+    def patchLoopback(self, name, device):  # creates a new loopback service
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
@@ -96,23 +96,21 @@ class NSOManipulator:
                                       headers=headers, data=data, verify=False, auth=('admin', 'admin'))
 
             print("response: ", response.status_code)
-            if response.status_code == 204 or response.status_code == 200:
+            if response.status_code == 204 or response.status_code == 200:  # no content or 200 OK
                 print("Successfully created loopback")
             else:
                 print("Failed to create loopback")
         except requests.exceptions.HTTPError as error:
             print(error)
 
-    def patchLoopbackAll(self, name): #creates a new loopback service for all devices
-        if not self.deviceNames: #if devicenames is not populated, populate it
+    def patchLoopbackAll(self, name):  # creates a new loopback service for all devices
+        if not self.deviceNames:  # if devicenames is not populated, populate it
             self.getDevices()
 
-        for device in self.deviceNames: #for every device create a loopback service
+        for device in self.deviceNames:  # for every device create a loopback service
             self.patchLoopback(name, device)
 
-
-
-    def deleteLoopback(self, name): #deletes the loopback we created
+    def deleteLoopback(self, name):  # deletes the loopback we created
         try:
             headers = {
                 'Content-Type': 'application/yang-data+json',
@@ -164,7 +162,3 @@ class NSOManipulator:
 if __name__ == "__main__":
     app = NSOManipulator()
     app.main()
-
-
-
-
