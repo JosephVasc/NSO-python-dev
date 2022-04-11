@@ -8,7 +8,7 @@ This is a CLI created with python requests to retrieve and manipulate data provi
               " 'patch loop'         patches a new Loopback service"
               " 'delete loop'        deletes existing Loopback service"
               " 'patch loop all'     patches a new Loopback service for all devices"
-              " 'device config'      returns config of specified device ")
+              " 'device config'      returns config of specified device"
 
 
 area's of improvement / things I did not get to:
