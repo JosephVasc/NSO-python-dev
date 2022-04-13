@@ -1,0 +1,43 @@
+<yang-patch xmlns="urn:ietf:params:xml:ns:yang:ietf-yang-patch">
+ <patch-id>add-device</patch-id>
+ <edit>
+  <edit-id>add-device-ios</edit-id>
+  <operation>create</operation>
+  <target>/device=ios123</target>
+  <value>
+   <device xmlns="http://tail-f.com/ns/ncs">
+    <name>ios123</name>
+    <address>10.10.20.175</address>
+    <authgroup>labadmin</authgroup>
+    <device-type>
+     <cli>
+      <ned-id xmlns:cisco-ios-cli-6.67="http://tail-f.com/ns/ned-id/cisco-ios-cli-6.67">cisco-ios-cli-6.67:cisco-ios-cli-6.67</ned-id>
+     </cli>
+    </device-type>
+    <state>
+     <admin-state>unlocked</admin-state>
+    </state>
+   </device>
+  </value>
+ </edit>
+  <edit>
+  <edit-id>add-device-ios2</edit-id>
+  <operation>create</operation>
+  <target>/device=ios1234</target>
+  <value>
+   <device xmlns="http://tail-f.com/ns/ncs">
+    <name>ios1234</name>
+    <address>10.10.20.173</address>
+    <authgroup>labadmin</authgroup>
+    <device-type>
+     <cli>
+      <ned-id xmlns:cisco-ios-cli-6.67="http://tail-f.com/ns/ned-id/cisco-ios-cli-6.67">cisco-ios-cli-6.67:cisco-ios-cli-6.67</ned-id>
+     </cli>
+    </device-type>
+    <state>
+     <admin-state>unlocked</admin-state>
+    </state>
+   </device>
+  </value>
+ </edit>
+</yang-patch>

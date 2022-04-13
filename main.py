@@ -1,5 +1,6 @@
 import requests
 import urllib3
+import json
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -9,6 +10,21 @@ class NSOManipulator:
     def __init__(self):
         self.url = "https://10.10.20.50:8888"
         self.deviceNames = []
+
+    def createDevice(self): #add devices from xml file.
+        headers = {
+            'Accept': 'application/yang-patch+xml',
+            'Content-Type': 'application/yang-patch+xml',
+        }
+
+        with open('devices/devices.xml') as f:
+            data = f.read().replace('\n', '')
+
+        response = requests.patch('https://10.10.20.50:8888/restconf/data/tailf-ncs:devices', headers=headers, data=data,
+                                auth=('admin', 'admin'), verify=False)
+
+        print(response.text)
+
 
     def getDevices(self):  # returns devices on nso
         try:
@@ -23,6 +39,10 @@ class NSOManipulator:
 
             response = requests.get('{0}/restconf/data/tailf-ncs:devices/device'.format(self.url), headers=headers,
                                     params=params, verify=False, auth=('admin', 'admin'))
+            if response.text == "":
+                print("no devices detected")
+                return
+
             print(response.text)
             deviceNames = response.json()
             for device in deviceNames['tailf-ncs:device']:
@@ -100,6 +120,8 @@ class NSOManipulator:
                 print("Successfully created loopback")
             else:
                 print("Failed to create loopback")
+                print("error message: " + response.text)
+
         except requests.exceptions.HTTPError as error:
             print(error)
 
@@ -133,6 +155,7 @@ class NSOManipulator:
               " 'patch loop'         patches a new Loopback service \n"
               " 'delete loop'        deletes existing Loopback service\n"
               " 'patch loop all'     patches a new Loopback service for all devices \n"
+              " 'add devices'        adds devices from file \n"
               " 'device config'      returns config of specified device ")
         while 1:
             print("please enter a valid command")
@@ -157,6 +180,8 @@ class NSOManipulator:
             if userInput.lower() == "patch loop all":
                 name = input("please enter name of service: ")
                 self.patchLoopbackAll(name)
+            if userInput.lower() == "add devices":
+                self.createDevice()
 
 
 if __name__ == "__main__":
